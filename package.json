@@ -1,0 +1,9 @@
+{
+  "dependencies": {
+    "graphql-tag": "^2.12.6"
+  },
+  "devDependencies": {
+    "@types/node": "^17.0.30",
+    "esbuild-runner": "^2.2.1"
+  }
+}
