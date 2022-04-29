@@ -1,10 +1,8 @@
 
-import { default as fetch } from 'node-fetch';
-
 const request = {
   query: `
 
-query Foo($bar: String = Something) {
+query Foo2($bar: String = Something) {
   hero(test: 1, foo: null) {
     name
   }
@@ -19,6 +17,7 @@ request.query = request.query.replace(/\s+/g, ' ').trim();
 console.info('Sending query:', request.query);
 
 (async () => {
+  const { default: fetch } = await import('node-fetch');
 
   const r = await fetch('http://localhost:8080/graphql', { method: 'POST', body: JSON.stringify(request) });
 

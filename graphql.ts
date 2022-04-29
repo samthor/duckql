@@ -1,5 +1,12 @@
+
+/**
+ * @fileoverview Handles incoming GraphQL queries (via `graphql-tag`) and passes to a single query
+ * resolver.
+ */
+
 import gql from 'graphql-tag';
 import { Kind, ValueNode, SelectionSetNode } from 'graphql';
+import type * as http from 'http';
 
 export interface GraphQLRequest {
   operationName?: string;
@@ -28,7 +35,10 @@ export interface ResolverContext {
 export type GraphQLType = number | string | Symbol | GraphQLType[] | { [key: string]: GraphQLType } | null;
 
 
-export class SafeGraphQLServer {
+/**
+ * Wraps a single resolver and handles GraphQL queries.
+ */
+export class GraphQLServer {
   #resolver;
 
   constructor(resolver: (context: ResolverContext) => any) {
@@ -89,9 +99,48 @@ export class SafeGraphQLServer {
     return selections;
   }
 
+  httpHandle = async (req: http.IncomingMessage, res: http.ServerResponse) => {
+    if (req.url !== '/graphql') {
+      res.statusCode = 404;
+      return;
+    }
+    if (req.method !== 'POST') {
+      res.statusCode = 405;
+      return;
+    }
+
+    const body = await new Promise<string>((resolve, reject) => {
+      const bufs: Buffer[] = [];
+      req.on('data', (chunk: Buffer) => bufs.push(chunk));
+      req.on('end', () => resolve(Buffer.concat(bufs).toString('utf-8')));
+      req.on('error', reject);
+    });
+
+    let json;
+    try {
+      json = JSON.parse(body);
+    } catch (e) {
+      res.statusCode = 400;
+      return;
+    }
+
+    if (!json.query) {
+      res.statusCode = 400;
+      return;
+    }
+
+    const request: GraphQLRequest = {
+      operationName: json.operationName || '',
+      query: json.query || '',
+      variables: json.variables || {},
+    };
+    const response = await this.handle(request);
+    res.write(JSON.stringify(response));
+  };
+
   handle = async (request: GraphQLRequest): Promise<{ data: any }> => {
     // We don't use this as a tag because... we don't need to. Also, it's normalized and cached by
-    // graphql-tag, so we don't have do that here.
+    // graphql-tag, so don't do that again.
     const parsed = gql(request.query);
     if (parsed.kind !== Kind.DOCUMENT) {
       throw new Error(`Got non-document GraphQL kind: ${parsed.kind}`);
@@ -99,7 +148,7 @@ export class SafeGraphQLServer {
 
     let operationName = request.operationName ?? '';
 
-    // Find the requested definitino.
+    // Find the requested definition, or the first definition if no name was specified.
     const defToRun = parsed.definitions.find((def) => {
       if (def.kind !== Kind.OPERATION_DEFINITION) {
         return false;
@@ -113,15 +162,19 @@ export class SafeGraphQLServer {
     }
     operationName = defToRun.name?.value || operationName;
 
+    // Construct variables available to the query based on the top-level query type. Grab either
+    // their default values or the user-specified variables.
     const variables: { [key: string]: any } = {};
-
     for (const variableDefinition of defToRun.variableDefinitions ?? []) {
       const name = variableDefinition.variable.name.value;
       variables[name] = request.variables[name] ?? (variableDefinition.defaultValue ? this.#buildJSArg(variableDefinition.defaultValue) : undefined);
     }
 
+    // Convert our selection to a much more sane JS object.
     const selection = this.#buildSelectionSet(defToRun.selectionSet, variables);
 
+    // Call our resolver. GraphQL is nested: the very top-level query is a type of request no
+    // different to any other, despite what other servers might say.
     const data = await this.#resolver({ operationName, selection });
     return { data };
   };
