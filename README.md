@@ -29,7 +29,7 @@ Yet, using Apollo requires us to specify a whole schema just to handle a request
 
 ## Usage
 
-DuckQL parses incoming GraphQL queries (via the core `graphql` package) and parses them into [a `RequestContext` type](src/types.d.ts):
+DuckQL parses incoming GraphQL queries (via the core `graphql` package) and parses them into [a `ResolverContext` type](src/types.d.ts):
 
 ```js
 import { DuckQLServer } from 'duckql';
@@ -53,7 +53,7 @@ const out = await gqlServer.handle({
 
 ### Other Helpers
 
-DuckQL can also process a query synchronously into a `RequestContext`:
+DuckQL can also process a query synchronously into a `ResolverContext`:
 
 ```js
 import { buildContext } from 'duckql';
@@ -95,7 +95,7 @@ Missing or unresolved variables are a parse error and will through `GraphQLQuery
 
 ## API
 
-The `RequestContext` is an object which wraps up the selections of your query in a structured way.
+The `ResolverContext` is an object which wraps up the selections of your query in a structured way.
 Most importantly, it has a property `selection`, which contains a recursive type `SelectionNode`:
 
 ```ts
