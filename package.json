@@ -1,6 +1,6 @@
 {
   "dependencies": {
-    "graphql-tag": "^2.12.6",
+    "graphql": "^16.4.0",
     "node-fetch": "^3.2.4"
   },
   "devDependencies": {

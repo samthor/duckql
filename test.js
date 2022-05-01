@@ -1,10 +1,19 @@
 
 const request = {
   query: `
-  {
+  
+  query Foxo($bar: Int = 5) {
     user(id: 5) {
       firstName
-      lastName
+      lastName {
+        bar(barArg: $bar) {
+          x {
+            y {
+              z
+            }
+          }
+        }
+      }
     }
   }
   `,
@@ -13,7 +22,6 @@ const request = {
   },
 };
 
-request.query = request.query.replace(/\s+/g, ' ').trim();
 console.info('Sending query:', request.query);
 
 (async () => {

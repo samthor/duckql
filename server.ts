@@ -4,13 +4,17 @@ import * as http from 'http';
 import { print } from 'graphql';
 
 
-const gqlServer = new GraphQLServer(async (context) => {
-  if (context.operationName === 'Foo') {
-    return { 'hello': 'there' };
-  }
+const gqlServer = new GraphQLServer({
+  async resolver(context) {
+    if (context.operationName === 'Foo') {
+      return { data: { 'hello': 'there' } };
+    }
 
-  console.debug('top-level node recreate:');
-  console.debug(print(context.selection.node));
+    console.debug('top-level node recreate:');
+    console.debug(print(context.selection.node));
+    console.debug('context:');
+    console.debug(JSON.stringify(context));
+  },
 });
 
 
