@@ -2,7 +2,7 @@
 // @ts-ignore
 import test from 'node:test';
 import * as assert from 'node:assert';
-import { buildContext, GraphQLServer } from '../src/graphql';
+import { buildContext, GraphQLQueryError, GraphQLServer } from '../src/graphql';
 import { ResolverContext } from '../src/types';
 import * as http from 'http';
 import fetch from 'node-fetch';
@@ -39,6 +39,26 @@ query Whatever($bar: Int = 5) {
     'id': [5],
   }, 'Variable should have been interpolated');
   assert.deepEqual(context.selection.sub['someOtherThing'].args, undefined, 'Has no args');
+});
+
+test('too long server', () => {
+  let calls = 0;
+
+  const s = new GraphQLServer({
+    resolver() {
+      ++calls;
+      return { data: null };
+    },
+    maxQueryLength: 10,
+  });
+
+  s.handle({ query: '{_}' });
+  assert.strictEqual(calls, 1);
+
+  assert.throws(() => {
+    s.handle({ query: '{ longerThan10Characters }' });
+  }, (err) => err instanceof GraphQLQueryError);
+  assert.strictEqual(calls, 1);
 });
 
 test('build mutation', () => {

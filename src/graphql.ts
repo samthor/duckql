@@ -103,9 +103,14 @@ export class GraphQLServer {
   /**
    * Parses a {@link GraphQLRequest} and passes to this instance's resolver.
    */
-  handle = async (request: GraphQLRequest): Promise<ResponseType> => {
+  handle = (request: GraphQLRequest): Promise<ResponseType> | ResponseType => {
     const context = buildContext(request, this.parse);
-    return (await this.#resolver(context)) ?? {};
+
+    const out = this.#resolver(context);
+    if (out instanceof Promise) {
+      return out.then((raw) => raw ?? {});
+    }
+    return out ?? {};
   };
 
 }
