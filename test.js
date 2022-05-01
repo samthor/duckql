@@ -2,7 +2,7 @@
 const request = {
   query: `
   
-  query Foxo($bar: Int = 5) {
+  query Foo($bar: Int = 5) {
     user(id: 5) {
       firstName
       lastName {

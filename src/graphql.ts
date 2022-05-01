@@ -4,7 +4,6 @@
  */
 
 import { parse, Kind, DocumentNode } from 'graphql';
-import type { FieldNode } from 'graphql';
 import type * as http from 'http';
 import { ParseCache } from './lib/parse-cache';
 import { SelectionContext } from './lib/selection';
@@ -36,7 +35,7 @@ export class GraphQLServer {
     this.#maxQueryLength = options.maxQueryLength ?? DEFAULT_MAX_QUERY_LENGTH;
 
     this.parse = (query: string): DocumentNode => {
-      if (request.query.length > this.#maxQueryLength) {
+      if (query.length > this.#maxQueryLength) {
         throw new GraphQLQueryError(`Query is too long, cowardly refusing to parse`);
       }
       return this.#parseCache.parse(query);
