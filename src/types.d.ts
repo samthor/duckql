@@ -4,7 +4,7 @@ import type { OperationDefinitionNode, FieldNode } from 'graphql';
 export interface GraphQLRequest {
   operationName?: string;
   query: string;
-  variables: GraphQLVariables;
+  variables?: GraphQLVariables;
 }
 
 export type SelectionNode = {

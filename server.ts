@@ -1,5 +1,5 @@
 
-import { GraphQLServer } from './graphql.js';
+import { GraphQLServer } from './src/graphql.js';
 import * as http from 'http';
 import { print } from 'graphql';
 

@@ -7,7 +7,7 @@ import { parse, Kind, DocumentNode } from 'graphql';
 import type { FieldNode } from 'graphql';
 import type * as http from 'http';
 import { ParseCache } from './lib/parse-cache';
-import { SetContext } from './lib/helper';
+import { SelectionContext } from './lib/selection';
 import { convertNodeToVar } from './lib/values';
 import type { GraphQLRequest, GraphQLVariables, ResolverContext } from './types';
 
@@ -152,35 +152,21 @@ export function buildContext(
   for (const variableDefinition of defToRun.variableDefinitions ?? []) {
     const name = variableDefinition.variable.name.value;
 
-    if (request.variables[name] !== undefined) {
+    if (request.variables?.[name] !== undefined) {
       variables[name] = request.variables[name];
     } else if (variableDefinition.defaultValue) {
       variables[name] = convertNodeToVar(variableDefinition.defaultValue, {});
     }
   }
 
-  // Pretend that the top-level query or mutation is a single "blank" field.
-  const virtualFieldNode: FieldNode = {
-    kind: Kind.FIELD,
-    name: {
-      kind: Kind.NAME,
-      value: '',
-    },
-    selectionSet: cloneAst(defToRun.selectionSet),
-  };
-
-  // Convert our selection to a much more sane JS object.
-  const c = new SetContext(variables);
-  const sub = c.build(virtualFieldNode) ?? {};
+  const c = new SelectionContext(variables);
+  const selection = c.build(defToRun.selectionSet);
 
   // Generate a friendly context to pass around.
   return {
     operationName,
     maxDepth: c.maxDepth,
-    selection: {
-      sub,
-      node: virtualFieldNode,
-    },
+    selection,
     node: defToRun,
   };
 }
@@ -188,5 +174,3 @@ export function buildContext(
 
 export class GraphQLQueryError extends Error { }
 
-
-const cloneAst = typeof structuredClone === 'function' ? structuredClone : <T>(x: T): T => JSON.parse(JSON.stringify(x));

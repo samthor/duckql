@@ -1,13 +1,16 @@
 
 import type { GraphQLVariables, SelectionNode, SelectionSet } from '../types';
-import type { FieldNode } from 'graphql';
+import type { FieldNode, SelectionSetNode } from 'graphql';
 import { Kind } from 'graphql';
 import { convertVarToNode, convertNodeToVar } from './values';
+
+// Use structuredClone from Node 17+.
+const cloneAst = typeof structuredClone === 'function' ? structuredClone : <T>(x: T): T => JSON.parse(JSON.stringify(x));
 
 /**
  * Helper that constructs {@link SelectionSet} from a {@link FieldNode}.
  */
-export class SetContext {
+export class SelectionContext {
   variables;
   maxDepth = 0;
 
@@ -16,16 +19,33 @@ export class SetContext {
   }
 
   /**
-   * Enumerate through all requested fields and interpolate {@link Kind.VARIABLE} into nodes.
+   * Pretend that the passed {@link SelectionSetNode} is a single "blank" field, and descend the
+   * tree to interpolate all {@link Kind.VARIABLE} into concrete values.
    *
-   * This must be called with a cloned AST, as it is modified in-place.
+   * This clones the passed node and returns a virtual {@link FieldNode}.
    */
-  build(node: FieldNode, depth: number = 0): SelectionSet | undefined {
+  build(selectionSet: SelectionSetNode): SelectionNode {
+    const virtualFieldNode: FieldNode = {
+      kind: Kind.FIELD,
+      name: {
+        kind: Kind.NAME,
+        value: '',
+      },
+      selectionSet: cloneAst(selectionSet),
+    };
+    return {
+      node: virtualFieldNode,
+      sub: this.#internalBuild(virtualFieldNode, 0),
+    };
+  }
+
+  #internalBuild(node: FieldNode, depth: number): SelectionSet | undefined {
     const selections = node.selectionSet?.selections;
     if (!selections) {
       return;
     }
 
+    ++depth;
     this.maxDepth = Math.max(depth, this.maxDepth);
 
     const set: SelectionSet = {};
@@ -56,7 +76,7 @@ export class SetContext {
         o.args = args;
       }
 
-      const sub = this.build(sel, depth + 1);
+      const sub = this.#internalBuild(sel, depth);
       if (sub) {
         o.sub = sub;
       }

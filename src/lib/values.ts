@@ -8,7 +8,7 @@ import type { ValueNode, ObjectFieldNode } from 'graphql';
  *
  * This uses {@link Symbol} to represent an `ENUM`.
  */
-export function convertNodeToVar(arg: ValueNode, variables: GraphQLVariables): GraphQLType {
+export function convertNodeToVar(arg: ValueNode, variables: GraphQLVariables = {}): GraphQLType {
   switch (arg.kind) {
     case Kind.NULL:
       // This is expressed like an enum but matches literal "null" (lowercase only).
