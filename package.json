@@ -5,18 +5,20 @@
   "devDependencies": {
     "@types/node": "^17.0.30",
     "@types/node-fetch": "^2.6.1",
+    "@types/polka": "^0.5.4",
     "esbuild-runner": "^2.2.1",
-    "node-fetch": "^3.2.4"
+    "node-fetch": "^3.2.4",
+    "polka": "^0.5.2"
   },
   "scripts": {
     "test": "cd test; esr index.ts",
-    "build": "esbuild --bundle --format=esm --external:graphql --outfile=dist/index.js src/index.ts"
+    "build": "esbuild --bundle --format=esm --external:graphql --outfile=dist/index.mjs src/index.ts"
   },
-  "types": "src/types.d.ts",
+  "types": "types.d.ts",
   "name": "duckql",
   "description": "A mostly GraphQL-compatible server.",
   "version": "1.0.0",
-  "main": "dist/index.js",
+  "main": "dist/index.mjs",
   "directories": {
     "test": "test"
   },

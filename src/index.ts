@@ -43,61 +43,78 @@ export class DuckQLServer {
   }
 
   /**
-   * Provides a HTTP server which responds to "/graphql".
+   * Builds HTTP middleware that intercepts requests to (by default) "/graphql".
    */
-  httpHandle = async (req: http.IncomingMessage, res: http.ServerResponse, next?: () => any) => {
-    if (req.url !== '/graphql') {
-      if (next) {
-        await next();
-      } else {
+  buildMiddleware(url = '/graphql') {
+    return (req: http.IncomingMessage, res: http.ServerResponse, next = () => {}) => {
+      if (req.url !== url) {
+        if (next) {
+          return next();
+        }
         res.statusCode = 404;
+        return res.end();
       }
-      return;
-    }
-    if (req.method !== 'POST') {
-      res.statusCode = 405;
-      return;
-    }
-
-    const body = await new Promise<string>((resolve, reject) => {
-      const bufs: Buffer[] = [];
-      req.on('data', (chunk: Buffer) => bufs.push(chunk));
-      req.on('end', () => resolve(Buffer.concat(bufs).toString('utf-8')));
-      req.on('error', reject);
-    });
-
-    let json;
-    try {
-      json = JSON.parse(body);
-    } catch (e) {
-      res.statusCode = 400;
-      return;
-    }
-
-    if (!json.query) {
-      res.statusCode = 400;
-      return;
-    }
-
-    const request: GraphQLRequest = {
-      operationName: json.operationName || '',
-      query: json.query || '',
-      variables: json.variables || {},
+      this.httpHandle(req, res);
     };
+  }
 
-    let response;
+  /**
+   * Provides a HTTP handler that accepts POST graphql requests.
+   */
+  httpHandle = async (req: http.IncomingMessage, res: http.ServerResponse) => {
     try {
-      response = await this.handle(request);
-    } catch (e) {
-      if (e instanceof GraphQLQueryError) {
-        res.statusCode = 400;
-        res.write(e.message);
+      if (req.method !== 'POST') {
+        res.statusCode = 405;
         return;
       }
-      throw e;
+
+      const body = await new Promise<string>((resolve, reject) => {
+        const bufs: Buffer[] = [];
+        req.on('data', (chunk: Buffer) => bufs.push(chunk));
+        req.on('end', () => resolve(Buffer.concat(bufs).toString('utf-8')));
+        req.on('error', reject);
+      });
+
+      let json;
+      try {
+        json = JSON.parse(body);
+      } catch (e) {
+        res.statusCode = 400;
+        res.write('Invalid JSON');
+        return;
+      }
+
+      if (!json.query || typeof json.query !== 'string') {
+        res.statusCode = 400;
+        res.write('Expected string query');
+        return;
+      }
+
+      const request: GraphQLRequest = {
+        operationName: json.operationName || '',
+        query: json.query || '',
+        variables: json.variables || {},
+      };
+
+      let response;
+      try {
+        response = await this.handle(request);
+      } catch (e) {
+        if (e instanceof GraphQLQueryError) {
+          res.statusCode = 400;
+          res.write(e.message);
+          return;
+        }
+        throw e;
+      }
+      res.setHeader('Content-Type', 'application/json');
+      res.write(JSON.stringify(response));
+    } catch (e) {
+      console.debug('DuckQLServer internal error', e);
+      res.statusCode = 500;
+    } finally {
+      res.end();
     }
-    res.setHeader('Content-Type', 'application/json');
-    res.write(JSON.stringify(response));
   };
 
   /**
@@ -171,7 +188,7 @@ export function buildContext(
     operation: defToRun.operation,
     operationName,
     maxDepth: c.maxDepth,
-    selection,
+    selection: selection,
     node: defToRun,
   };
 }

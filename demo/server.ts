@@ -1,8 +1,9 @@
 
 import { DuckQLServer } from '../src/index';
-import * as http from 'http';
 import { print } from 'graphql';
 
+
+import polka from 'polka';
 
 const gqlServer = new DuckQLServer({
   async resolver(context) {
@@ -10,23 +11,21 @@ const gqlServer = new DuckQLServer({
       return { data: { 'hello': 'there' } };
     }
 
-    console.debug('top-level node recreate:');
-    console.debug(print(context.selection.node));
-    console.debug('context:');
-    console.debug(JSON.stringify(context));
+    const t = context.selection.sub['user'];
+
+    console.debug('node recreate:');
+    console.debug(print(t.node));
   },
 });
 
 
-const server = http.createServer(async (req, res) => {
-  try {
-    await gqlServer.httpHandle(req, res);
-  } catch (e) {
-    console.debug('Got unhandled server error', e);
-    res.statusCode = 500;
-  } finally {
-    res.end();
-  }
-});
-server.listen(8080);
+polka()
+  .use(gqlServer.buildMiddleware())
+  .post('/graphql-other', gqlServer.httpHandle)
+  .get('/', (req, res) => {
+    res.end('Hi!')
+  })
+  .listen(3000, () => {
+    console.log(`> Running on localhost:3000`);
+  });
 

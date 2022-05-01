@@ -1,5 +1,5 @@
 
-import type { GraphQLVariables, SelectionNode, SelectionSet } from '../types';
+import type { GraphQLVariables, RootSelectionNode, SelectionNode, SelectionSet } from '../types';
 import type { FieldNode, SelectionSetNode } from 'graphql';
 import { Kind } from 'graphql';
 import { convertVarToNode, convertNodeToVar } from './values';
@@ -24,7 +24,7 @@ export class SelectionContext {
    *
    * This clones the passed node and returns a virtual {@link FieldNode}.
    */
-  build(selectionSet: SelectionSetNode): SelectionNode {
+  build(selectionSet: SelectionSetNode): RootSelectionNode {
     const virtualFieldNode: FieldNode = {
       kind: Kind.FIELD,
       name: {
@@ -35,7 +35,7 @@ export class SelectionContext {
     };
     return {
       node: virtualFieldNode,
-      sub: this.#internalBuild(virtualFieldNode, 0),
+      sub: this.#internalBuild(virtualFieldNode, 0) ?? {},
     };
   }
 

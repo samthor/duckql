@@ -8,12 +8,17 @@ export interface GraphQLRequest {
 }
 
 export type SelectionNode = {
-  args?: { [key: string]: GraphQLType },
-  directives?: any[],
-  sub?: SelectionSet,
-  node: FieldNode,
+  args?: { [key: string]: GraphQLType };
+  directives?: any[];
+  sub?: SelectionSet;
+  node: FieldNode;
 };
 export type SelectionSet = { [key: string]: SelectionNode };
+
+export type RootSelectionNode = SelectionNode & {
+  args?: never;
+  sub: SelectionSet;
+}
 
 export interface ResolverContext {
   operation: OperationTypeNode;
@@ -26,7 +31,7 @@ export interface ResolverContext {
    */
   node: OperationDefinitionNode;
 
-  selection: SelectionNode;
+  selection: RootSelectionNode;
 }
 
 export type GraphQLVariables = { [key: string]: GraphQLType };

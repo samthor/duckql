@@ -2,7 +2,7 @@
 const request = {
   query: `
   
-  query Foo($bar: Int = 5) {
+  query($bar: Int = 5) {
     user(id: 5) {
       firstName
       lastName {
@@ -27,7 +27,7 @@ console.info('Sending query:', request.query);
 (async () => {
   const { default: fetch } = await import('node-fetch');
 
-  const r = await fetch('http://localhost:8080/graphql', { method: 'POST', body: JSON.stringify(request) });
+  const r = await fetch('http://localhost:3000/graphql', { method: 'POST', body: JSON.stringify(request) });
 
   if (!r.ok) {
     const out = await r.text();
