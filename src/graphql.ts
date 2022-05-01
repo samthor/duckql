@@ -45,10 +45,10 @@ export class GraphQLServer {
   /**
    * Provides a HTTP server which responds to "/graphql".
    */
-  httpHandle = async (req: http.IncomingMessage, res: http.ServerResponse, next?: () => void) => {
+  httpHandle = async (req: http.IncomingMessage, res: http.ServerResponse, next?: () => any) => {
     if (req.url !== '/graphql') {
       if (next) {
-        next();
+        await next();
       } else {
         res.statusCode = 404;
       }
@@ -163,6 +163,7 @@ export function buildContext(
 
   // Generate a friendly context to pass around.
   return {
+    operation: defToRun.operation,
     operationName,
     maxDepth: c.maxDepth,
     selection,

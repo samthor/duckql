@@ -37,4 +37,12 @@ export class ParseCache {
     this.#usedQueryLength = 0;
     this.#cache.clear();
   }
+
+  get count() {
+    return this.#cache.size;
+  }
+
+  get use() {
+    return this.#usedQueryLength / this.#queryLength;
+  }
 }

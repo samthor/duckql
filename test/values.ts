@@ -2,7 +2,7 @@
 // @ts-ignore
 import test from 'node:test';
 import * as assert from 'node:assert';
-import { convertNodeToVar, convertVarToNode } from '../../src/lib/values';
+import { convertNodeToVar, convertVarToNode } from '../src/lib/values';
 import { Kind } from 'graphql';
 
 test('convertNodeToVar', () => {

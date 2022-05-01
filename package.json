@@ -1,11 +1,11 @@
 {
   "dependencies": {
-    "graphql": "^16.4.0",
-    "node-fetch": "^3.2.4"
+    "graphql": "^16.4.0"
   },
   "devDependencies": {
     "@types/node": "^17.0.30",
     "@types/node-fetch": "^2.6.1",
-    "esbuild-runner": "^2.2.1"
+    "esbuild-runner": "^2.2.1",
+    "node-fetch": "^3.2.4"
   }
 }

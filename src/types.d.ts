@@ -1,5 +1,5 @@
 
-import type { OperationDefinitionNode, FieldNode } from 'graphql';
+import type { OperationDefinitionNode, FieldNode, OperationTypeNode } from 'graphql';
 
 export interface GraphQLRequest {
   operationName?: string;
@@ -16,6 +16,7 @@ export type SelectionNode = {
 export type SelectionSet = { [key: string]: SelectionNode };
 
 export interface ResolverContext {
+  operation: OperationTypeNode;
   operationName: string;
 
   maxDepth: number;
