@@ -13,7 +13,6 @@ test('parseCache', () => {
   assert.strictEqual(x.count, 1);
   assert.strictEqual(node1, node2);
 
-
   const big1 = x.parse(`
 query Foo {
   user {

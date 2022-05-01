@@ -16,7 +16,7 @@ test('build', () => {
   assert.deepEqual(context.operation, 'query')
   assert.strictEqual(context.maxDepth, 1);
   assert.strictEqual(context.operationName, '');
-  assert.deepStrictEqual(Object.keys(context.selection.sub), ['_']);
+  assert.deepStrictEqual(Object.keys(context.selection.sub ?? {}), ['_']);
 
   context = buildContext({
     query: `
@@ -34,8 +34,8 @@ query Whatever($bar: Int = 5) {
   });
   assert.deepEqual(context.operation, 'query')
   assert.strictEqual(context.maxDepth, 3);
-  assert.deepStrictEqual(Object.keys(context.selection.sub), ['doThing', 'someOtherThing']);
-  assert.deepStrictEqual(context.selection.sub['doThing'].args, {
+  assert.deepStrictEqual(Object.keys(context.selection.sub ?? {}), ['doThing', 'someOtherThing']);
+  assert.deepStrictEqual(context.selection.sub?.['doThing'].args, {
     'id': [5],
   }, 'Variable should have been interpolated');
   assert.deepEqual(context.selection.sub['someOtherThing'].args, undefined, 'Has no args');
@@ -102,7 +102,7 @@ test('server', async () => {
       server.listen();
     });
     const address = server.address();
-    if (typeof address !== 'object') {
+    if (!address || typeof address !== 'object') {
       throw new Error(`must be object address`)
     }
     const { port } = address;
