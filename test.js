@@ -1,15 +1,15 @@
 
 const request = {
   query: `
-
-query Foo2($bar: String = Something) {
-  hero(test: 1, foo: null) {
-    name
+  {
+    user(id: 5) {
+      firstName
+      lastName
+    }
   }
-}
   `,
   variables: {
-    'a': 123,
+    'bar': 1,
   },
 };
 

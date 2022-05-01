@@ -1,13 +1,16 @@
 
 import { GraphQLServer } from './graphql.js';
 import * as http from 'http';
+import { print } from 'graphql';
 
 
 const gqlServer = new GraphQLServer(async (context) => {
   if (context.operationName === 'Foo') {
-    return {'hello': 'there'};
+    return { 'hello': 'there' };
   }
-  console.debug('got selection:', context.operationName, context.selection);
+
+  console.debug('top-level node recreate:');
+  console.debug(print(context.selection.node));
 });
 
 
