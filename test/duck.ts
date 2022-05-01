@@ -2,7 +2,7 @@
 // @ts-ignore
 import test from 'node:test';
 import * as assert from 'node:assert';
-import { buildContext, GraphQLQueryError, GraphQLServer } from '../src/graphql';
+import { buildContext, GraphQLQueryError, DuckQLServer } from '../src/index';
 import { ResolverContext } from '../src/types';
 import * as http from 'http';
 import fetch from 'node-fetch';
@@ -44,7 +44,7 @@ query Whatever($bar: Int = 5) {
 test('too long server', () => {
   let calls = 0;
 
-  const s = new GraphQLServer({
+  const s = new DuckQLServer({
     resolver() {
       ++calls;
       return { data: null };
@@ -84,7 +84,7 @@ test('server', async () => {
     res.end();
   });
 
-  const graphqlServer = new GraphQLServer({
+  const graphqlServer = new DuckQLServer({
     resolver(context) {
       return {
         data: {

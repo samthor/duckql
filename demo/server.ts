@@ -1,10 +1,10 @@
 
-import { GraphQLServer } from './src/graphql.js';
+import { DuckQLServer } from '../src/index';
 import * as http from 'http';
 import { print } from 'graphql';
 
 
-const gqlServer = new GraphQLServer({
+const gqlServer = new DuckQLServer({
   async resolver(context) {
     if (context.operationName === 'Foo') {
       return { data: { 'hello': 'there' } };

@@ -14,7 +14,7 @@ export const DEFAULT_MAX_QUERY_LENGTH = 2_000;
 
 export type ResponseType = { data?: any };
 
-export interface GraphQLServerOptions {
+export interface DuckQLServerOptions {
   resolver: (context: ResolverContext) => Promise<ResponseType | undefined> | ResponseType | undefined;
   parseCache?: ParseCache;
   maxQueryLength?: number;
@@ -23,13 +23,13 @@ export interface GraphQLServerOptions {
 /**
  * Wraps a single resolver and handles GraphQL queries.
  */
-export class GraphQLServer {
+export class DuckQLServer {
   #resolver;
   #parseCache;
   #maxQueryLength;
   parse;
 
-  constructor(options: GraphQLServerOptions) {
+  constructor(options: DuckQLServerOptions) {
     this.#resolver = options.resolver;
     this.#parseCache = options.parseCache ?? new ParseCache();
     this.#maxQueryLength = options.maxQueryLength ?? DEFAULT_MAX_QUERY_LENGTH;

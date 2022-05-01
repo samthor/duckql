@@ -9,6 +9,28 @@
     "node-fetch": "^3.2.4"
   },
   "scripts": {
-    "test": "cd test; esr index.ts"
-  }
+    "test": "cd test; esr index.ts",
+    "build": "esbuild --bundle --format=esm --external:graphql --outfile=dist/index.js src/index.ts"
+  },
+  "types": "src/types.d.ts",
+  "name": "duckql",
+  "description": "A mostly GraphQL-compatible server.",
+  "version": "1.0.0",
+  "main": "dist/index.js",
+  "directories": {
+    "test": "test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/samthor/duckql.git"
+  },
+  "keywords": [
+    "GraphQL"
+  ],
+  "author": "Sam Thorogood <sam.thorogood@gmail.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/samthor/duckql/issues"
+  },
+  "homepage": "https://github.com/samthor/duckql#readme"
 }

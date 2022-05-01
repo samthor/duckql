@@ -1,4 +1,4 @@
-import { GraphQLQueryError } from "../graphql";
+import { GraphQLQueryError } from '../index';
 import { Kind } from 'graphql';
 import type { GraphQLType, GraphQLVariables } from '../types';
 import type { ValueNode, ObjectFieldNode } from 'graphql';
