@@ -16,7 +16,7 @@
   },
   "types": "types.d.ts",
   "name": "duckql",
-  "description": "A mostly GraphQL-compatible server.",
+  "description": "🦆 DuckQL, untyped GraphQL server",
   "version": "1.0.0",
   "main": "dist/index.mjs",
   "directories": {
