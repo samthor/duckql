@@ -1,3 +1,5 @@
+[![Tests](https://github.com/samthor/duckql/actions/workflows/node.js.yml/badge.svg)](https://github.com/samthor/duckql/actions/workflows/node.js.yml)
+
 DuckQL is an untyped GraphQL server that lets you write JS to resolve queries without a schema.
 It's a useful layer to build custom resolvers or as a way of unifying other GraphQL servers.
 
