@@ -12,7 +12,8 @@
   },
   "scripts": {
     "test": "cd test; esr index.ts",
-    "build": "esbuild --bundle --format=esm --external:graphql --outfile=dist/index.mjs src/index.ts"
+    "build": "esbuild --bundle --format=esm --external:graphql --outfile=dist/index.mjs src/index.ts",
+    "prepublishOnly": "npm run build"
   },
   "types": "types.d.ts",
   "name": "duckql",
