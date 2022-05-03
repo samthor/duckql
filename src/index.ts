@@ -84,21 +84,26 @@ export class DuckQLServer {
         return;
       }
 
-      if (!json.query || typeof json.query !== 'string') {
-        res.statusCode = 400;
-        res.write('Expected string query');
-        return;
-      }
+      const manyRequests = Array.isArray(json);
+      const queries: any[] = manyRequests ? json : [json];
 
-      const request: GraphQLRequest = {
-        operationName: json.operationName || '',
-        query: json.query || '',
-        variables: json.variables || {},
-      };
+      const resultPromises = queries.map((req) => {
+        if (!req.query || typeof req.query !== 'string') {
+          throw new GraphQLQueryError(`Expected string query, was: ${JSON.stringify(req.query)}`);
+        }
 
-      let response;
+        const request: GraphQLRequest = {
+          operationName: req.operationName || '',
+          query: req.query || '',
+          variables: req.variables || {},
+        };
+
+        return this.handle(request);
+      });
+
+      let results;
       try {
-        response = await this.handle(request);
+        results = await resultPromises;
       } catch (e) {
         if (e instanceof GraphQLQueryError) {
           res.statusCode = 400;
@@ -108,7 +113,7 @@ export class DuckQLServer {
         throw e;
       }
       res.setHeader('Content-Type', 'application/json');
-      res.write(JSON.stringify(response));
+      res.write(JSON.stringify(manyRequests ? results : results[0]));
     } catch (e) {
       console.debug('DuckQLServer internal error', e);
       res.statusCode = 500;
